@@ -2,129 +2,69 @@
 
 ## GenLayer-Powered RWA Maritime Verification
 
-OceanProof is a maritime RWA verification platform powered by GenLayer Intelligent Contracts.
+OceanProof is a GenLayer Intelligent Contract for verifying real-world
+maritime shipping events using independent evidence sources and
+AI-powered consensus.
 
-It transforms fragmented real-world shipping data into consensus-backed, verifiable maritime events.
+It transforms fragmented maritime data into a consensus-backed,
+machine-readable verification result:
 
-## Core Workflow
+- `VERIFIED`
+- `DISPUTED`
+- `UNVERIFIED`
 
-Real-world maritime data
-→ AIS
-→ Port Authority
-→ Carrier
-→ IoT
+The goal is to provide a reusable verification primitive for
+real-world asset (RWA) and supply-chain applications.
 
-↓
+---
 
-OceanProof Verification Request
+## Problem
 
-↓
+Maritime shipping data is fragmented across multiple independent
+sources.
 
-GenLayer Intelligent Contract
-
-↓
-
-AI Validators
-
-↓
-
-GenLayer Consensus
-
-↓
-
-Verified / Disputed / Unverified
-
-↓
-
-On-chain Maritime Event Record
-
-## Core Use Case
-
-OceanProof verifies real-world container shipping events such as:
-
-- Container loaded
-- Vessel departed
-- Vessel in transit
-- Vessel arrived
-- Container discharged
-- Customs cleared
-- Cargo delivered
-- Shipment delayed
-- Cargo damaged
-
-## Why GenLayer?
-
-Maritime data can conflict between independent sources.
+For the same shipment, different systems may report different states.
 
 For example:
 
-AIS:
-Vessel has not arrived.
+- AIS: Vessel has not arrived
+- Port Authority: Container has arrived
+- Carrier: Shipment marked as arrived
+- IoT: No reliable sensor data available
 
-Port:
-Container has arrived.
+A traditional application may simply trust one source.
 
-Carrier:
-Shipment marked as arrived.
+OceanProof instead asks GenLayer's Intelligent Contract validators
+to independently evaluate the available evidence and reach a
+consensus-backed classification.
 
-OceanProof uses a GenLayer Intelligent Contract to evaluate conflicting evidence and produce a consensus-backed verification result.
+---
 
-## Demo Scenarios
+## Core Workflow
 
-### Scenario A — Verified
-
-AIS → ARRIVED
-
-Port → ARRIVED
-
-Carrier → ARRIVED
-
-Expected result:
-
-VERIFIED
-
-### Scenario B — Conflicting Evidence
-
-AIS → NOT ARRIVED
-
-Port → ARRIVED
-
-Carrier → ARRIVED
-
-IoT → UNKNOWN
-
-Expected result:
-
-DISPUTED
-
-### Scenario C — Insufficient Evidence
-
-AIS → UNKNOWN
-
-Port → UNKNOWN
-
-Carrier → ARRIVED
-
-Expected result:
-
-UNVERIFIED
-
-## Project Architecture
-
-ContainerRegistry
-→ manages container RWA records
-
-ShipmentVerifier
-→ evaluates maritime evidence using GenLayer
-
-MaritimeEventRegistry
-→ stores verified maritime events
-
-## Future Extensions
-
-- Dangerous goods verification
-- Cargo insurance verification
-- Trade finance
-- Customs verification
-- Shipping dispute resolution
-- Cargo damage verification
+```text
+Real-World Maritime Data
+        │
+        ├── AIS
+        ├── Port Authority
+        ├── Carrier
+        └── IoT
+        │
+        ▼
+OceanProof Verification Request
+        │
+        ▼
+GenLayer Intelligent Contract
+        │
+        ▼
+AI Validators
+        │
+        ▼
+GenLayer Consensus
+        │
+        ├── VERIFIED
+        ├── DISPUTED
+        └── UNVERIFIED
+        │
+        ▼
+On-Chain Verification Result
