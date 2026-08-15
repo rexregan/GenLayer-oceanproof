@@ -1,0 +1,8 @@
+OceanProof Test Evidence — IoT
+
+Container: MSCU7654321
+Event: ARRIVAL
+
+IoT status: UNKNOWN.
+
+No reliable IoT arrival sensor data is available for this test case.
