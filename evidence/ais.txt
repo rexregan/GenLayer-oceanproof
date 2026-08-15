@@ -1,8 +1,24 @@
 OceanProof Test Evidence — AIS
 
-Container: MSCU7654321
-Event: ARRIVAL
+Case ID: OP-MSCU7654321-ARRIVAL
+Container ID: MSCU7654321
+Event Type: ARRIVAL
 
-AIS status: NOT ARRIVED.
+Source Type: AIS Test Fixture
+Source Record ID: AIS-TEST-MSCU7654321-001
+Publisher: OceanProof Test Environment
 
-The vessel has not arrived at the destination port according to this test AIS record.
+Claim:
+The vessel associated with this shipment has not arrived
+at the destination port according to this test AIS record.
+
+Observed Status: NOT ARRIVED
+
+Evidence Classification: TEST / SYNTHETIC
+Authentication Status: NOT AUTHENTICATED
+
+GenLayer Usage:
+This record is an evidence input only.
+It must not be treated as an authoritative source by itself.
+The final shipment status is determined through independent
+evidence evaluation and GenLayer consensus.
