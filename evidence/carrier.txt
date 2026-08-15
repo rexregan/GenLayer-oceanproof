@@ -1,8 +1,24 @@
 OceanProof Test Evidence — Carrier
 
-Container: MSCU7654321
-Event: ARRIVAL
+Case ID: OP-MSCU7654321-ARRIVAL
+Container ID: MSCU7654321
+Event Type: ARRIVAL
 
-Carrier status: ARRIVED.
+Source Type: Carrier Test Fixture
+Source Record ID: CARRIER-TEST-MSCU7654321-001
+Publisher: OceanProof Test Environment
 
-The carrier record reports that the container has arrived at the destination port.
+Claim:
+The carrier record reports that the container has arrived
+at the destination port.
+
+Observed Status: ARRIVED
+
+Evidence Classification: TEST / SYNTHETIC
+Authentication Status: NOT AUTHENTICATED
+
+GenLayer Usage:
+This record is an evidence input only.
+It must not be treated as an authoritative source by itself.
+The final shipment status is determined through independent
+evidence evaluation and GenLayer consensus.
