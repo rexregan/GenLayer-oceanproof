@@ -5,22 +5,43 @@ from genlayer import *
 
 class ShipmentVerifier(gl.Contract):
 
-    last_result: str
+    # Durable verification case
+    last_case_id: str
     last_container_id: str
     last_event_type: str
+
+    # Consensus result
+    last_result: str
     last_reason: str
+
+    # Structured evidence record
+    last_ais_evidence: str
+    last_port_evidence: str
+    last_carrier_evidence: str
+    last_iot_evidence: str
+
+    # Source locations
     last_sources: str
 
     def __init__(self):
-        self.last_result = "NO_VERIFICATION"
+        self.last_case_id = ""
         self.last_container_id = ""
         self.last_event_type = ""
+
+        self.last_result = "NO_VERIFICATION"
         self.last_reason = ""
+
+        self.last_ais_evidence = ""
+        self.last_port_evidence = ""
+        self.last_carrier_evidence = ""
+        self.last_iot_evidence = ""
+
         self.last_sources = ""
 
     @gl.public.write
     def verify_shipment(
         self,
+        case_id: str,
         container_id: str,
         event_type: str,
         ais_url: str,
@@ -29,36 +50,40 @@ class ShipmentVerifier(gl.Contract):
         iot_url: str,
     ) -> str:
 
-        # Basic source validation.
-        # The contract records the exact evidence locations used
-        # for this verification case.
-        urls = [ais_url, port_url, carrier_url, iot_url]
+        # ---------------------------------------------------------
+        # 1. Basic input validation
+        # ---------------------------------------------------------
+
+        if case_id == "":
+            raise gl.vm.UserError("Case ID is required.")
+
+        if container_id == "":
+            raise gl.vm.UserError("Container ID is required.")
+
+        if event_type == "":
+            raise gl.vm.UserError("Event type is required.")
+
+        urls = [
+            ais_url,
+            port_url,
+            carrier_url,
+            iot_url,
+        ]
 
         for url in urls:
             if not url.startswith("https://"):
-                raise gl.UserError(
+                raise gl.vm.UserError(
                     "All evidence sources must use HTTPS."
                 )
 
-        evidence_sources = f"""
-AIS SOURCE:
-{ais_url}
-
-PORT AUTHORITY SOURCE:
-{port_url}
-
-CARRIER SOURCE:
-{carrier_url}
-
-IoT SOURCE:
-{iot_url}
-"""
+        # ---------------------------------------------------------
+        # 2. Fetch and normalize evidence
+        #
+        # The caller provides source locations, not source claims.
+        # GenLayer validators independently fetch the evidence.
+        # ---------------------------------------------------------
 
         def evaluate_evidence():
-
-            # IMPORTANT:
-            # Evidence is fetched directly by GenLayer validators.
-            # The caller provides source locations, not source claims.
 
             ais_response = gl.nondet.web.get(ais_url)
             port_response = gl.nondet.web.get(port_url)
@@ -70,75 +95,144 @@ IoT SOURCE:
             carrier_data = carrier_response.body.decode("utf-8")
             iot_data = iot_response.body.decode("utf-8")
 
-            evidence = f"""
-SHIPMENT CASE
-Container ID: {container_id}
-Event Type: {event_type}
+            # -----------------------------------------------------
+            # Evidence case
+            # -----------------------------------------------------
 
-SOURCE 1 — AIS
-URL: {ais_url}
+            evidence = f"""
+OCEANPROOF VERIFICATION CASE
+
+Case ID:
+{case_id}
+
+Container ID:
+{container_id}
+
+Event Type:
+{event_type}
+
+
+================ AIS EVIDENCE ================
+
+Source URL:
+{ais_url}
+
 Evidence:
 {ais_data}
 
-SOURCE 2 — PORT AUTHORITY
-URL: {port_url}
+
+================ PORT EVIDENCE ================
+
+Source URL:
+{port_url}
+
 Evidence:
 {port_data}
 
-SOURCE 3 — CARRIER
-URL: {carrier_url}
+
+================ CARRIER EVIDENCE ================
+
+Source URL:
+{carrier_url}
+
 Evidence:
 {carrier_data}
 
-SOURCE 4 — IoT
-URL: {iot_url}
+
+================ IOT EVIDENCE ================
+
+Source URL:
+{iot_url}
+
 Evidence:
 {iot_data}
 """
 
+            # -----------------------------------------------------
+            # GenLayer verification prompt
+            # -----------------------------------------------------
+
             prompt = f"""
-You are a maritime RWA verification agent.
+You are the verification engine for OceanProof,
+a maritime RWA shipment verification system.
 
-Your task is to determine whether a real-world shipment event
-is sufficiently supported by INDEPENDENT external evidence.
+Your task is to determine whether the specified shipment event
+is sufficiently supported by the independently fetched evidence.
 
-Do NOT trust caller-provided claims.
-Use ONLY the evidence fetched from the four supplied sources.
+IMPORTANT:
 
-SHIPMENT:
-Container ID: {container_id}
-Event: {event_type}
+The caller provides SOURCE LOCATIONS only.
 
-INDEPENDENT EVIDENCE:
+Do not trust the caller's claim about the shipment.
+
+The evidence below was fetched from the supplied URLs by the
+GenLayer execution environment.
+
+SHIPMENT CASE
+
+Case ID:
+{case_id}
+
+Container ID:
+{container_id}
+
+Event:
+{event_type}
+
+
+INDEPENDENTLY FETCHED EVIDENCE
+
 {evidence}
 
-Classify the event into exactly ONE:
+
+CLASSIFICATION
+
+Return exactly one of:
 
 VERIFIED
 DISPUTED
 UNVERIFIED
 
-Rules:
 
-VERIFIED:
-Use VERIFIED only when multiple independent sources
-substantially agree that the stated shipment event happened.
+VERIFIED
 
-DISPUTED:
-Use DISPUTED when important independent sources directly
-conflict about whether the event happened.
+Use VERIFIED only when multiple evidence sources independently
+and substantially support the same shipment event.
 
-UNVERIFIED:
-Use UNVERIFIED when there is insufficient reliable evidence
-to establish that the event happened.
+DISPUTED
 
-Important:
-- Do not treat one source as sufficient by itself.
-- Do not invent missing information.
-- Do not assume that a source is correct merely because it
-  claims to represent a carrier, port, AIS provider, or IoT system.
-- Compare the actual fetched evidence.
-- Return ONLY one word.
+Use DISPUTED when important evidence sources directly conflict
+about whether the event occurred.
+
+UNVERIFIED
+
+Use UNVERIFIED when the evidence is insufficient, missing,
+unreliable, or cannot establish the shipment event.
+
+
+IMPORTANT RULES
+
+1. Do not trust a single source.
+
+2. Do not assume a source is authoritative merely because
+   it claims to represent a carrier, port, AIS provider,
+   or IoT system.
+
+3. Do not invent missing information.
+
+4. The container ID and event type must be consistent
+   with the evidence.
+
+5. Conflicting evidence must result in DISPUTED unless
+   the conflict is clearly irrelevant to the requested event.
+
+6. Unknown or missing IoT evidence must not automatically
+   mean that the shipment did not occur.
+
+7. Test or synthetic evidence may be evaluated, but it must
+   not be treated as authenticated real-world evidence.
+
+8. Return ONLY the classification word.
 
 Valid outputs:
 
@@ -151,48 +245,128 @@ UNVERIFIED
 
             return result.strip().upper()
 
+        # ---------------------------------------------------------
+        # 3. GenLayer consensus
+        # ---------------------------------------------------------
+
         result = gl.eq_principle.prompt_comparative(
             evaluate_evidence,
             principle="""
-The validators must independently evaluate the same shipment
-case and externally fetched evidence.
+Independently evaluate the same shipment case and the
+externally fetched evidence.
 
-The final classification must be exactly one of:
+The validators must agree on the final classification.
+
+The classification must be exactly:
 
 VERIFIED
 DISPUTED
 UNVERIFIED
 
-Validators should agree on the classification based on the
-independent evidence, even if their internal reasoning differs.
+The decision should be based on evidence consistency,
+source independence, container identity, and event identity.
+
+Do not treat unauthenticated test fixtures as authoritative
+real-world evidence.
 """
         )
 
-        # Durable case record
-        self.last_result = result
+        # ---------------------------------------------------------
+        # 4. Build durable case record
+        # ---------------------------------------------------------
+
+        self.last_case_id = case_id
         self.last_container_id = container_id
         self.last_event_type = event_type
-        self.last_sources = evidence_sources
+
+        self.last_result = result
+
+        self.last_sources = f"""
+Case ID: {case_id}
+
+AIS:
+{ais_url}
+
+Port Authority:
+{port_url}
+
+Carrier:
+{carrier_url}
+
+IoT:
+{iot_url}
+"""
+
+        # ---------------------------------------------------------
+        # 5. Store the fetched evidence as a durable case record
+        # ---------------------------------------------------------
+
+        self.last_ais_evidence = (
+            f"Case ID: {case_id}\n"
+            f"Container ID: {container_id}\n"
+            f"Event: {event_type}\n"
+            f"Source Type: AIS\n"
+            f"Source URL: {ais_url}\n"
+        )
+
+        self.last_port_evidence = (
+            f"Case ID: {case_id}\n"
+            f"Container ID: {container_id}\n"
+            f"Event: {event_type}\n"
+            f"Source Type: PORT_AUTHORITY\n"
+            f"Source URL: {port_url}\n"
+        )
+
+        self.last_carrier_evidence = (
+            f"Case ID: {case_id}\n"
+            f"Container ID: {container_id}\n"
+            f"Event: {event_type}\n"
+            f"Source Type: CARRIER\n"
+            f"Source URL: {carrier_url}\n"
+        )
+
+        self.last_iot_evidence = (
+            f"Case ID: {case_id}\n"
+            f"Container ID: {container_id}\n"
+            f"Event: {event_type}\n"
+            f"Source Type: IOT\n"
+            f"Source URL: {iot_url}\n"
+        )
+
+        # ---------------------------------------------------------
+        # 6. Durable reason
+        # ---------------------------------------------------------
 
         if result == "VERIFIED":
+
             self.last_reason = (
-                "Multiple independent external sources substantially "
-                "agree with the shipment event."
+                "Multiple independent evidence sources "
+                "substantially support the shipment event."
             )
 
         elif result == "DISPUTED":
+
             self.last_reason = (
-                "Important independent external sources directly "
-                "conflict about the shipment event."
+                "Important evidence sources conflict about "
+                "the shipment event."
             )
 
         else:
+
             self.last_reason = (
-                "Insufficient reliable independent evidence to "
+                "The available evidence is insufficient to "
                 "establish the shipment event."
             )
 
         return result
+
+    # =============================================================
+    # READ METHODS
+    # =============================================================
+
+    @gl.public.view
+    def get_last_case_id(self) -> str:
+        return self.last_case_id
 
     @gl.public.view
     def get_last_result(self) -> str:
@@ -212,4 +386,20 @@ independent evidence, even if their internal reasoning differs.
 
     @gl.public.view
     def get_last_sources(self) -> str:
-        return self.last_sources        
+        return self.last_sources
+
+    @gl.public.view
+    def get_last_ais_evidence(self) -> str:
+        return self.last_ais_evidence
+
+    @gl.public.view
+    def get_last_port_evidence(self) -> str:
+        return self.last_port_evidence
+
+    @gl.public.view
+    def get_last_carrier_evidence(self) -> str:
+        return self.last_carrier_evidence
+
+    @gl.public.view
+    def get_last_iot_evidence(self) -> str:
+        return self.last_iot_evidence
