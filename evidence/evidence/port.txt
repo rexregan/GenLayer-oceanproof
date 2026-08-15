@@ -1,0 +1,8 @@
+OceanProof Test Evidence — Port Authority
+
+Container: MSCU7654321
+Event: ARRIVAL
+
+Port Authority status: ARRIVED.
+
+Arrival at the destination port is confirmed according to this test port record.
