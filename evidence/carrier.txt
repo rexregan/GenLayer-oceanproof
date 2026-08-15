@@ -1,0 +1,8 @@
+OceanProof Test Evidence — Carrier
+
+Container: MSCU7654321
+Event: ARRIVAL
+
+Carrier status: ARRIVED.
+
+The carrier record reports that the container has arrived at the destination port.
