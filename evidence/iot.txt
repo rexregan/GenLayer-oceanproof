@@ -1,8 +1,25 @@
 OceanProof Test Evidence — IoT
 
-Container: MSCU7654321
-Event: ARRIVAL
+Case ID: OP-MSCU7654321-ARRIVAL
+Container ID: MSCU7654321
+Event Type: ARRIVAL
 
-IoT status: UNKNOWN.
+Source Type: IoT Test Fixture
+Source Record ID: IOT-TEST-MSCU7654321-001
+Publisher: OceanProof Test Environment
 
-No reliable IoT arrival sensor data is available for this test case.
+Claim:
+No reliable IoT arrival sensor data is available
+for this test case.
+
+Observed Status: UNKNOWN
+
+Evidence Classification: TEST / SYNTHETIC
+Authentication Status: NOT AUTHENTICATED
+
+GenLayer Usage:
+This record is an evidence input only.
+The absence of reliable IoT data must not be interpreted
+as proof that the shipment did not arrive.
+The final shipment status is determined through independent
+evidence evaluation and GenLayer consensus.
