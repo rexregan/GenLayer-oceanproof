@@ -1,0 +1,8 @@
+OceanProof Test Evidence — AIS
+
+Container: MSCU7654321
+Event: ARRIVAL
+
+AIS status: NOT ARRIVED.
+
+The vessel has not arrived at the destination port according to this test AIS record.
