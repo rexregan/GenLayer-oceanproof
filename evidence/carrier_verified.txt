@@ -1,0 +1,9 @@
+OceanProof Synthetic Test Evidence — Carrier
+
+Container: MSCU7654321
+Event: ARRIVAL_AT_PORT
+
+Carrier status: ARRIVED.
+
+The carrier record reports that the container arrived
+at the destination port.
