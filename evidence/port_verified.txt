@@ -1,0 +1,8 @@
+OceanProof Synthetic Test Evidence — Port Authority
+
+Container: MSCU7654321
+Event: ARRIVAL_AT_PORT
+
+Port Authority status: ARRIVED.
+
+The container is recorded as arrived at the destination port.
