@@ -1,0 +1,9 @@
+OceanProof Synthetic Test Evidence — AIS
+
+Container: MSCU7654321
+Event: ARRIVAL_AT_PORT
+
+AIS status: ARRIVED.
+
+The vessel carrying the test container is recorded as
+having arrived at the destination port.
