@@ -1,0 +1,8 @@
+OceanProof Synthetic Test Evidence — IoT
+
+Container: MSCU7654321
+Event: ARRIVAL_AT_PORT
+
+IoT status: ARRIVED.
+
+The IoT test record confirms the container arrival event.
